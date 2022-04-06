@@ -1,11 +1,10 @@
 package TL2;
 
-import TL2.interfaces.Register;
-import TL2.interfaces.Transaction;
+import TL2.interfaces.*;
 
 import java.util.Date;
 
-public class RegisterImpl<T> implements TL2.interfaces.Register<T>
+public class RegisterImpl<T> implements Register<T>
 {
     private T value;
     private Date date;
@@ -46,7 +45,7 @@ public class RegisterImpl<T> implements TL2.interfaces.Register<T>
     }
 
     @Override
-    public synchronized T read(Transaction t) throws AbortException
+    public T read(Transaction t) throws AbortException
     {
         Register<?> local = t.getCopy(this);
 
@@ -74,7 +73,7 @@ public class RegisterImpl<T> implements TL2.interfaces.Register<T>
     }
 
     @Override
-    public synchronized void write(Transaction t, T v) throws AbortException
+    public void write(Transaction t, T v) throws AbortException
     {
         try {
         t.putCopy(this, (Register<?>) this.clone());
