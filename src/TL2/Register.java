@@ -2,7 +2,7 @@ package TL2;
 
 import java.util.Date;
 
-public class TL2Register<T> {
+public class Register<T> {
     private T value;
     private Date date;
     private boolean locked;
@@ -15,16 +15,16 @@ public class TL2Register<T> {
         this.locked = locked;
     }
 
-    public synchronized T read(TL2Transaction t) throws AbortException {
-        TL2Register local = (TL2Register) t.getFromLws(this.hashCode());
+    public synchronized T read(Transaction t) throws AbortException {
+        Register local = (Register) t.getFromLws(this.hashCode());
 
         // Return local if exists
         if (local != null) {
             return (T) local.value;
         } else {
-            TL2Register copy = null;
+            Register copy = null;
             try {
-                copy = (TL2Register) this.clone();
+                copy = (Register) this.clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 throw new AbortException();
@@ -39,14 +39,13 @@ public class TL2Register<T> {
         }
     }
 
-    public synchronized void write(TL2Transaction t, T v) throws AbortException {
-        TL2Register copy = null;
+    public synchronized void write(Transaction t, T v) throws AbortException {
         try {
-            copy = (TL2Register) this.clone();
+            t.putCopy(this, (Register) this.clone());
+            t.addToLws(this);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             throw new AbortException();
         }
-        t.setInLws(this.hashCode(), copy);
     }
 }

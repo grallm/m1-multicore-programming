@@ -2,7 +2,7 @@ package TL2;
 
 import java.util.*;
 
-public class TL2Transaction {
+public class Transaction {
     /**
      * Transaction start date
      */
@@ -10,19 +10,19 @@ public class TL2Transaction {
     /**
      * All written variables
      */
-    private List<TL2Register> lws;
+    private List<Register> lws;
     /**
      * All read variables
      */
-    private List<TL2Register> lrs;
+    private List<Register> lrs;
     /**
      * All local variables
      *
      * Map<Original register, Copy register>
      */
-    private Map<TL2Register, TL2Register> lx;
+    private Map<Register, Register> lx;
 
-    public void addToLws (TL2Register original) {
+    public void addToLws (Register original) {
         lws.add(original);
     }
 
@@ -31,12 +31,12 @@ public class TL2Transaction {
     }
 
     /**
-     * Add a copy with original register as key
+     * Set a copy with original register as key
      */
-    public void addToCopies (TL2Register original, TL2Register copy) {
+    public void putCopy (Register original, Register copy) {
         lx.put(original, copy);
     }
-    public boolean hasCopy (TL2Register original) {
+    public boolean hasCopy (Register original) {
         return lx.get(original) != null;
     }
 
