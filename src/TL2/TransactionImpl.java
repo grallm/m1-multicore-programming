@@ -1,21 +1,25 @@
 package TL2;
 
+import TL2.interfaces.Register;
+import TL2.interfaces.Transaction;
+
 import java.util.*;
 
-public class Transaction {
+public class TransactionImpl implements Transaction
+{
     /**
      * Transaction start date
      */
-    private Date birthDate;
+    private Date                            birthDate;
     private Date commitDate;
     /**
      * All written variables
      */
-    private List<Register> lws;
+    private List<Register>              lws;
     /**
      * All read variables
      */
-    private List<Register> lrs;
+    private List<Register>              lrs;
     /**
      * All local variables
      *
@@ -23,10 +27,12 @@ public class Transaction {
      */
     private Map<Register, Register> lc;
 
+    @Override
     public void addToLws (Register original) {
         lws.add(original);
     }
 
+    @Override
     public Date getBirthDate() {
         return birthDate;
     }
@@ -34,13 +40,17 @@ public class Transaction {
     /**
      * Set a copy with original register as key
      */
+    @Override
     public void putCopy (Register original, Register copy) {
         lc.put(original, copy);
     }
+
+    @Override
     public Register getCopy (Register original) {
         return lc.get(original);
     }
 
+    @Override
     public void begin() {
         birthDate = new Date();
         lws = new ArrayList<>();
@@ -49,7 +59,9 @@ public class Transaction {
         commitDate = null;
     }
 
-    public synchronized void try_to_commit() throws AbortException {
+    @Override
+    public synchronized void try_to_commit() throws AbortException
+    {
         // Lock all lws
         for (Register register : lws) {
             register.setLocked(true);
@@ -62,7 +74,7 @@ public class Transaction {
                 for (Register registerLws : lws) {
                     registerLws.setLocked(false);
                 }
-                throw new AbortException();
+                throw new AbortException("Register is locked or register date is after birth date");
             }
         }
 
@@ -76,6 +88,7 @@ public class Transaction {
         }
     }
 
+    @Override
     public boolean isCommited() {
         return commitDate != null;
     }
