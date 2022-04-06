@@ -39,23 +39,23 @@ public class RegisterImpl<T> implements Register<T>
     }
 
     @Override
-    public void setValue(Object value)
+    public void setValue(T value)
     {
-        this.value = (T) value;
+        this.value = value;
     }
 
     @Override
     public T read(Transaction t) throws AbortException
     {
-        Register<?> local = t.getCopy(this);
+        Register local = t.getCopy(this);
 
         // Return local if exists
         if (local != null) {
             return (T) local;
         } else {
-            Register<?> copy = null;
+            Register copy = null;
             try {
-                copy = (Register<?>) this.clone();
+                copy = (Register) this.clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 throw new AbortException("Can't clone this register");
@@ -76,7 +76,7 @@ public class RegisterImpl<T> implements Register<T>
     public void write(Transaction t, T v) throws AbortException
     {
         try {
-        t.putCopy(this, (Register<?>) this.clone());
+        t.putCopy(this, (Register) this.clone());
         t.addToLws(this);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();

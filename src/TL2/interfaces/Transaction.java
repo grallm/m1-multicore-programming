@@ -10,11 +10,11 @@ public interface Transaction
     public void try_to_commit() throws AbortException;
     public boolean isCommited();
 
-    public Register<?> getCopy(Register<?> original);
+    public Register getCopy(Register original);
 
-    void addToLws(Register<?> original);
+    void addToLws(Register original);
 
     Date getBirthDate();
 
-    public void putCopy (Register<?> original, Register<?> copy);
+    public void putCopy (Register original, Register copy);
 }
