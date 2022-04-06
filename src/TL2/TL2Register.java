@@ -5,6 +5,15 @@ import java.util.Date;
 public class TL2Register<T> {
     private T value;
     private Date date;
+    private boolean locked;
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
 
     public synchronized T read(TL2Transaction t) throws AbortException {
         TL2Register local = (TL2Register) t.getFromLws(this.hashCode());

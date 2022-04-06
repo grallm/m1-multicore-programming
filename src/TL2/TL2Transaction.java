@@ -10,32 +10,48 @@ public class TL2Transaction {
     /**
      * All written variables
      */
-    private Map<Integer, TL2Register> lws;
+    private List<TL2Register> lws;
     /**
      * All read variables
      */
-    private List<Integer> lrs;
+    private List<TL2Register> lrs;
+    /**
+     * All local variables
+     *
+     * Map<Original register, Copy register>
+     */
+    private Map<TL2Register, TL2Register> lx;
 
-    public TL2Register getFromLws(int id) {
-        return lws.get(id);
-    }
-
-    public TL2Register setInLws(int id, TL2Register copy) {
-        return lws.put(id, copy);
+    public void addToLws (TL2Register original) {
+        lws.add(original);
     }
 
     public Date getBirthDate() {
         return birthDate;
     }
 
-    public void begin() {
-        birthDate = new Date();
-        lws = new HashMap<>();
-        lrs = new ArrayList<>();
+    /**
+     * Add a copy with original register as key
+     */
+    public void addToCopies (TL2Register original, TL2Register copy) {
+        lx.put(original, copy);
+    }
+    public boolean hasCopy (TL2Register original) {
+        return lx.get(original) != null;
     }
 
-    public void try_to_commit() throws AbortException {
+    public void begin() {
+        birthDate = new Date();
+        lws = new ArrayList<>();
+        lrs = new ArrayList<>();
+        lx = new HashMap<>();
+    }
 
+    public synchronized void try_to_commit() throws AbortException {
+        // Lock all if available
+        // for (Integer var : lrs) {
+        //
+        // }
     }
 
     public boolean isCommited() {
