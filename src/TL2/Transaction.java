@@ -7,6 +7,7 @@ public class Transaction {
      * Transaction start date
      */
     private Date birthDate;
+    private Date commitDate;
     /**
      * All written variables
      */
@@ -20,7 +21,7 @@ public class Transaction {
      *
      * Map<Original register, Copy register>
      */
-    private Map<Register, Register> lx;
+    private Map<Register, Register> lc;
 
     public void addToLws (Register original) {
         lws.add(original);
@@ -34,27 +35,48 @@ public class Transaction {
      * Set a copy with original register as key
      */
     public void putCopy (Register original, Register copy) {
-        lx.put(original, copy);
+        lc.put(original, copy);
     }
     public Register getCopy (Register original) {
-        return lx.get(original);
+        return lc.get(original);
     }
 
     public void begin() {
         birthDate = new Date();
         lws = new ArrayList<>();
         lrs = new ArrayList<>();
-        lx = new HashMap<>();
+        lc = new HashMap<>();
+        commitDate = null;
     }
 
     public synchronized void try_to_commit() throws AbortException {
-        // Lock all if available
-        // for (Integer var : lrs) {
-        //
-        // }
+        // Lock all lws
+        for (Register register : lws) {
+            register.setLocked(true);
+        }
+
+        // Check if no lrs are locked and date compatibility
+        for (Register register : lrs) {
+            if (register.isLocked() || register.getDate().after(this.birthDate)) {
+                // Release all locks and abort
+                for (Register registerLws : lws) {
+                    registerLws.setLocked(false);
+                }
+                throw new AbortException();
+            }
+        }
+
+        commitDate = new Date();
+
+        // Update value and date of Write registers
+        for (Register register : lws) {
+            register.setValue(lc.get(register).getValue());
+            register.setDate(commitDate);
+            register.setLocked(false);
+        }
     }
 
     public boolean isCommited() {
-        return false;
+        return commitDate != null;
     }
 }

@@ -10,9 +10,22 @@ public class Register<T> {
     public boolean isLocked() {
         return locked;
     }
-
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+    public T getValue() {
+        return value;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+    public Date getDate() {
+        return date;
     }
 
     public synchronized T read(Transaction t) throws AbortException {
