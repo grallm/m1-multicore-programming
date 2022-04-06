@@ -16,7 +16,7 @@ public class Register<T> {
     }
 
     public synchronized T read(Transaction t) throws AbortException {
-        Register local = (Register) t.getFromLws(this.hashCode());
+        Register local = (Register) t.getCopy(this);
 
         // Return local if exists
         if (local != null) {
@@ -29,7 +29,9 @@ public class Register<T> {
                 e.printStackTrace();
                 throw new AbortException();
             }
-            t.setInLws(this.hashCode(), copy);
+
+            t.putCopy(this, copy);
+            t.addToLws(this);
 
             if (copy.date.after(t.getBirthDate())) {
                 throw new AbortException();

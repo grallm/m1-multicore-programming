@@ -36,8 +36,8 @@ public class Transaction {
     public void putCopy (Register original, Register copy) {
         lx.put(original, copy);
     }
-    public boolean hasCopy (Register original) {
-        return lx.get(original) != null;
+    public Register getCopy (Register original) {
+        return lx.get(original);
     }
 
     public void begin() {
