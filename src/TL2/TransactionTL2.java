@@ -1,11 +1,11 @@
 package TL2;
 
-import TL2.interfaces.Register;
-import TL2.interfaces.Transaction;
+import TL2.interfaces.IRegisterTL2;
+import TL2.interfaces.ITransactionTL2;
 
 import java.util.*;
 
-public class TransactionImpl implements Transaction
+public class TransactionTL2 implements ITransactionTL2
 {
     /**
      * Transaction start date
@@ -15,20 +15,20 @@ public class TransactionImpl implements Transaction
     /**
      * All written variables
      */
-    private List<Register<?>>              lws;
+    private List<IRegisterTL2<?>>              lws;
     /**
      * All read variables
      */
-    private List<Register<?>>              lrs;
+    private List<IRegisterTL2<?>>              lrs;
     /**
      * All local variables
      *
      * Map<Original register, Copy register>
      */
-    private Map<Register<?>, Register<?>> lc;
+    private Map<IRegisterTL2<?>, IRegisterTL2<?>> lc;
 
     @Override
-    public void addToLws (Register<?> original) {
+    public void addToLws (IRegisterTL2<?> original) {
         lws.add(original);
     }
 
@@ -41,12 +41,12 @@ public class TransactionImpl implements Transaction
      * Set a copy with original register as key
      */
     @Override
-    public void putCopy (Register<?> original, Register<?> copy) {
+    public void putCopy (IRegisterTL2<?> original, IRegisterTL2<?> copy) {
         lc.put(original, copy);
     }
 
     @Override
-    public Register<?> getCopy (Register<?> original) {
+    public IRegisterTL2<?> getCopy (IRegisterTL2<?> original) {
         return lc.get(original);
     }
 
@@ -63,15 +63,15 @@ public class TransactionImpl implements Transaction
     public synchronized void try_to_commit() throws AbortException
     {
         // Lock all lws
-        for (Register<?> register : lws) {
+        for (IRegisterTL2<?> register : lws) {
             register.setLocked(true);
         }
 
         // Check if no lrs are locked and date compatibility
-        for (Register<?> register : lrs) {
+        for (IRegisterTL2<?> register : lrs) {
             if (register.isLocked() || register.getDate().after(this.birthDate)) {
                 // Release all locks and abort
-                for (Register<?> registerLws : lws) {
+                for (IRegisterTL2<?> registerLws : lws) {
                     registerLws.setLocked(false);
                 }
                 throw new AbortException("Register is locked or register date is after birth date");
@@ -81,7 +81,7 @@ public class TransactionImpl implements Transaction
         commitDate = new Date();
 
         // Update value and date of Write registers
-        for (Register<?> register : lws) {
+        for (IRegisterTL2 register : lws) {
             register.setValue(lc.get(register).getValue());
             register.setDate(commitDate);
             register.setLocked(false);

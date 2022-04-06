@@ -4,58 +4,54 @@ import TL2.interfaces.*;
 
 import java.util.Date;
 
-public class RegisterImpl<T> implements Register<T>
+public class RegisterTL2<T> implements IRegisterTL2<T>
 {
     private T value;
     private Date date;
     private boolean locked;
 
-    @Override
     public boolean isLocked() {
         return locked;
     }
 
-    @Override
     public void setLocked(boolean locked) {
         this.locked = locked;
     }
 
-    @Override
     public Date getDate()
     {
         return date;
     }
 
-    @Override
     public void setDate(Date date)
     {
         this.date = date;
     }
 
-    @Override
     public T getValue()
     {
         return value;
     }
 
-    @Override
-    public void setValue(Object value)
+    public void setValue(T value)
     {
         this.value = (T) value;
     }
 
-    @Override
-    public T read(Transaction t) throws AbortException
+    public T read(Transaction t) throws AbortException {
+        return this.read((TransactionTL2) t);
+    }
+    public T read(ITransactionTL2 t) throws AbortException
     {
-        Register<?> local = t.getCopy(this);
+        IRegisterTL2<?> local = t.getCopy(this);
 
-        // Return local if exists
+        // Return local's value, if exists
         if (local != null) {
-            return (T) local;
+            return (T) local.getValue();
         } else {
-            Register<?> copy = null;
+            IRegisterTL2<?> copy = null;
             try {
-                copy = (Register<?>) this.clone();
+                copy = (IRegisterTL2<?>) this.clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 throw new AbortException("Can't clone this register");
@@ -68,15 +64,17 @@ public class RegisterImpl<T> implements Register<T>
                 throw new AbortException("Copied date is after transaction birth date");
             }
 
-            return (T) copy;
+            return (T) copy.getValue();
         }
     }
 
-    @Override
-    public void write(Transaction t, T v) throws AbortException
+    public void write(Transaction t, T v) throws AbortException {
+        this.write((TransactionTL2) t, v);
+    }
+    public void write(ITransactionTL2 t, T v) throws AbortException
     {
         try {
-        t.putCopy(this, (Register<?>) this.clone());
+        t.putCopy(this, (IRegisterTL2<?>) this.clone());
         t.addToLws(this);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
