@@ -15,7 +15,7 @@ public class TransactionTL2 implements ITransactionTL2
     /**
      * All written variables
      */
-    private List<IRegisterTL2<?>>              lws;
+    private SortedSet<IRegisterTL2<?>>              lws;
     /**
      * All read variables
      */
@@ -53,7 +53,7 @@ public class TransactionTL2 implements ITransactionTL2
     @Override
     public void begin() {
         birthDate = new Date();
-        lws = new ArrayList<>();
+        lws = new TreeSet<>();
         lrs = new ArrayList<>();
         lc = new HashMap<>();
         commitDate = null;

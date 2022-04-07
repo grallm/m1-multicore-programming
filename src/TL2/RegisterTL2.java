@@ -97,4 +97,9 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
             throw new AbortException("Can't clone this register");
         }
     }
+
+    @Override
+    public int compareTo(IRegisterTL2<T> o) {
+        return this.hashCode() > o.hashCode() ? 1 : -1;
+    }
 }
