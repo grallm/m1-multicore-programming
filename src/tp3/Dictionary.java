@@ -4,6 +4,9 @@ package tp3;
  * TODO: this class is not thread-safe. Make the method add linearizable and wait-free!
  */
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * An implementation of a set of strings based on a dictionary. 
  * The strings of the set are kept sorted according to their lexicographic ordering and common prefixes of two strings in the set are only encoded once.
@@ -76,9 +79,38 @@ public class Dictionary {
 	
 			return next.add(s, depth);
 		}
-	
-	}
 
+		/**
+		 * Access all suffixes and nexts
+		 */
+		public void getFull() {
+			int idx = 0;
+			StringBuilder str = new StringBuilder();
+
+			// Get all suffixes
+			Node node = this;
+			while (node.suffix != null) {
+				str.append(node.character);
+				node = node.suffix;
+			}
+
+			System.out.println(str);
+		}
+		private String getFullStart(int idx, Node node) {
+			List<StringBuilder> words = new ArrayList<StringBuilder>();
+			words.add(new StringBuilder());
+
+			// Get all suffixes
+			while (node.suffix != null) {
+				words.get(0).append(node.character);
+				node = node.suffix;
+			}
+
+			words.get(0).append(" (").append(idx).append(")");
+
+
+		}
+	}
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
 	private Node start = new Node('\0', null);
 	// The empty string is stored separately
@@ -97,5 +129,29 @@ public class Dictionary {
 		emptyAbsent = false;
 		return result;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "Dictionary{" + "\n" +
+				"start=" + start +
+				'}';
+	}
+
+	/**
+	 * Access all suffixes and nexts
+	 */
+	public void getFull() {
+		int idx = 0;
+		StringBuilder str = new StringBuilder();
+
+		// Get all suffixes
+		Node node = start.next;
+		while (node.suffix != null) {
+			str.append(node.character);
+			node = node.suffix;
+		}
+
+		System.out.println(str);
+	}
+
 }
