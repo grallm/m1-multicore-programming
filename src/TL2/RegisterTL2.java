@@ -18,6 +18,8 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
      */
     public RegisterTL2(T value) {
         this.value = value;
+        this.date = new Date();
+
         // true to have starvation-freedom
         this.lock = new ReentrantLock(true);
     }
@@ -101,5 +103,14 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     @Override
     public int compareTo(IRegisterTL2<T> o) {
         return this.hashCode() > o.hashCode() ? 1 : -1;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        RegisterTL2<T> clone = (RegisterTL2<T>) super.clone();
+
+        clone.date = (Date) this.date.clone();
+        clone.value = this.getValue();
+        return clone;
     }
 }
