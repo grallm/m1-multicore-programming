@@ -9,7 +9,8 @@ public interface IRegisterTL2<T> extends Register<T>
 {
     boolean isLocked();
 
-    void setLocked(boolean locked);
+    void lock();
+    void unlock();
 
     Date getDate();
 

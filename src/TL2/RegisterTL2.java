@@ -3,19 +3,35 @@ package TL2;
 import TL2.interfaces.*;
 
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class RegisterTL2<T> implements IRegisterTL2<T>
 {
     private T value;
     private Date date;
-    private boolean locked;
+    private final Lock lock;
+    private boolean isLocked;
 
-    public boolean isLocked() {
-        return locked;
+    /**
+     * Constructor
+     */
+    public RegisterTL2(T value) {
+        this.value = value;
+        // true to have starvation-freedom
+        this.lock = new ReentrantLock(true);
     }
 
-    public void setLocked(boolean locked) {
-        this.locked = locked;
+    public void lock() {
+        lock.lock();
+        isLocked = true;
+    }
+    public void unlock() {
+        lock.unlock();
+        isLocked = false;
+    }
+    public boolean isLocked() {
+        return isLocked;
     }
 
     public Date getDate()

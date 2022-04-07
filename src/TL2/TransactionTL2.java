@@ -64,7 +64,7 @@ public class TransactionTL2 implements ITransactionTL2
     {
         // Lock all lws
         for (IRegisterTL2<?> register : lws) {
-            register.setLocked(true);
+            register.lock();
         }
 
         // Check if no lrs are locked and date compatibility
@@ -72,7 +72,7 @@ public class TransactionTL2 implements ITransactionTL2
             if (register.isLocked() || register.getDate().after(this.birthDate)) {
                 // Release all locks and abort
                 for (IRegisterTL2<?> registerLws : lws) {
-                    registerLws.setLocked(false);
+                    registerLws.unlock();
                 }
                 throw new AbortException("Register is locked or register date is after birth date");
             }
@@ -84,7 +84,7 @@ public class TransactionTL2 implements ITransactionTL2
         for (IRegisterTL2 register : lws) {
             register.setValue(lc.get(register).getValue());
             register.setDate(commitDate);
-            register.setLocked(false);
+            register.unlock();
         }
     }
 
