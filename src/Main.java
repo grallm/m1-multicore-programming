@@ -9,15 +9,17 @@ public class Main {
 
         Dictionary dic = new Dictionary();
 
-        for (String str : dicWords) {
-            Transaction t = new TransactionTL2();
-            t.begin();
-            dic.add(str, t);
-            try {
-                t.try_to_commit();
-            } catch (AbortException e) {
-                e.printStackTrace();
+        try {
+            for (String str : dicWords) {
+                Transaction t = new TransactionTL2();
+                while (!t.isCommited()) {
+                    t.begin();
+                    dic.add(str, t);
+                    t.try_to_commit();
+                }
             }
+        } catch (AbortException e) {
+            e.printStackTrace();
         }
     }
 }
