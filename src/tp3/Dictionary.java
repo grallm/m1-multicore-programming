@@ -4,6 +4,11 @@ package tp3;
  * TODO: this class is not thread-safe. Make the method add linearizable and wait-free!
  */
 
+import TL2.AbortException;
+import TL2.RegisterTL2;
+import TL2.interfaces.Register;
+import TL2.interfaces.Transaction;
+
 /**
  * An implementation of a set of strings based on a dictionary. 
  * The strings of the set are kept sorted according to their lexicographic ordering and common prefixes of two strings in the set are only encoded once.
@@ -32,13 +37,13 @@ public class Dictionary {
 		boolean absent = true;
 		// Encodes the set of strings starting with the string leading to this word, 
 		// including the character encoded by this node
-		Node suffix = null;
+		Register<Node> suffix = null;
 		// Encodes the set of strings starting with the string leading to this word, 
 		// excluding the character encoded by this node, 
 		// and whose next character is strictly greater than the character encoded by this node
-		Node next;
+		Register<Node> next;
 
-		Node(char character, Node next) { 
+		Node(char character, Register<Node> next) {
 			this.character = character; 
 			this.next = next; 
 		}
@@ -51,7 +56,7 @@ public class Dictionary {
 		 * @param depth The number of time the pointer "suffix" has been followed
 		 * @return true if s was not already inserted, false otherwise
 		 */
-		boolean add(String s, int depth) {
+		boolean add(String s, int depth, Transaction t) throws AbortException {
 
 			// First case: we are at the end of the string and this is the correct node
 			if(depth >= s.length() || (s.charAt(depth) == character) && depth == s.length() - 1) {
@@ -63,24 +68,37 @@ public class Dictionary {
 			// Second case: the next character in the string was found, but this is not the end of the string
 			// We continue in member "suffix"
 			if(s.charAt(depth) == character) {
-				if (suffix == null || suffix.character > s.charAt(depth+1)) 
-					suffix = new Node(s.charAt(depth+1), suffix);
-				return suffix.add(s, depth+1);
+				if (suffix == null) {
+					suffix = new RegisterTL2<>(new Node(s.charAt(depth+1), null));
+				} else if (suffix.read(t).character > s.charAt(depth+1)){
+					suffix.write(t, new Node(s.charAt(depth+1), suffix));
+				}
+
+				Node node = suffix.read(t);
+				boolean result = node.add(s, depth+1, t);
+				suffix.write(t, node);
+				return result;
 			}
 
 			// Third case: the next character in the string was not found
 			// We continue in member "next"
 			// To maintain the order, we may have to add a new node before "next" first
-			if (next == null || next.character > s.charAt(depth))
-				next = new Node(s.charAt(depth), next);
-	
-			return next.add(s, depth);
+			if (next == null) {
+				next = new RegisterTL2<>(new Node(s.charAt(depth), null));
+			} else if (next.read(t).character > s.charAt(depth)){
+				next.write(t, new Node(s.charAt(depth), next));
+			}
+
+			Node node = next.read(t);
+			boolean result = node.add(s, depth, t);
+			next.write(t, node);
+			return result;
 		}
 	
 	}
 
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
-	private Node start = new Node('\0', null);
+	private final Register<Node> start = new RegisterTL2<>(new Node('\0', null));
 	// The empty string is stored separately
 	private boolean emptyAbsent = true;
 
@@ -91,8 +109,17 @@ public class Dictionary {
 	 * @param s The string that is being inserted in the set
 	 * @return true if s was not already inserted, false otherwise
 	 */
-	public boolean add(String s) {
-		if (s != "") return start.add(s, 0);
+	public boolean add(String s, Transaction t) {
+		if (s != "") {
+			try {
+				Node node = start.read(t);
+				boolean result = node.add(s, 0, t);
+				start.write(t, node);
+				return result;
+			} catch (AbortException e) {
+				e.printStackTrace();
+			}
+		}
 		boolean result = emptyAbsent;
 		emptyAbsent = false;
 		return result;

@@ -1,3 +1,6 @@
+import TL2.AbortException;
+import TL2.TransactionTL2;
+import TL2.interfaces.Transaction;
 import tp3.Dictionary;
 
 public class Main {
@@ -7,10 +10,15 @@ public class Main {
         Dictionary dic = new Dictionary();
 
         for (String str : dicWords) {
-            dic.add(str);
+            Transaction t = new TransactionTL2();
+            t.begin();
+            dic.add(str, t);
+            try {
+                t.try_to_commit();
+            } catch (AbortException e) {
+                e.printStackTrace();
+            }
         }
-
-        dic.getFull();
     }
 }
 
