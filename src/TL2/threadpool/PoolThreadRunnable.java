@@ -1,39 +1,54 @@
 package TL2.threadpool;
 
+import TL2.AbortException;
+import TL2.TransactionTL2;
+import TL2.interfaces.Transaction;
+import tp3.Dictionary;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.FutureTask;
 
 public class PoolThreadRunnable implements Runnable
 {
     private Thread thread = null;
-    private BlockingQueue<?> queueWithPriority;
-    private BlockingQueue<?> queueWithoutPriority;
+    private BlockingQueue<FutureTask<?>> queue;
     private boolean isStopped = false;
 
-    public PoolThreadRunnable(BlockingQueue<?> _queueWithPriority, BlockingQueue<?> _queueWithoutPriority)
+    public PoolThreadRunnable(BlockingQueue<FutureTask<?>> _queue)
     {
-        queueWithPriority = _queueWithPriority;
-        queueWithoutPriority = _queueWithoutPriority;
+        queue = _queue;
     }
 
     public void run()
     {
+        Dictionary dic = new Dictionary();
         this.thread = Thread.currentThread();
 
         while (!isStopped())
         {
             try
             {
-                FutureTask<?> runnable;
-                if (queueWithPriority.size() > 0)
+                if (queue.size() > 0)
                 {
-                    runnable = (FutureTask<?>) queueWithPriority.take();
+                    FutureTask<Task> runnable = (FutureTask<Task>) queue.take();
+                    runnable.run();
+                    Transaction t = runnable.get().transaction;
+                    String str = runnable.get().string;
+
+                    while (!t.isCommited())
+                    {
+                        try
+                        {
+                            t.begin();
+                            dic.add(str, t);
+                            t.try_to_commit();
+                        }
+                        catch (AbortException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                else
-                {
-                    runnable = (FutureTask<?>) queueWithoutPriority.take();
-                }
-                runnable.run();
             }
             catch (Exception e)
             {
