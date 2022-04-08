@@ -6,8 +6,12 @@ package tp3;
 
 import TL2.AbortException;
 import TL2.RegisterTL2;
+import TL2.TransactionTL2;
 import TL2.interfaces.Register;
 import TL2.interfaces.Transaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An implementation of a set of strings based on a dictionary. 
@@ -110,6 +114,7 @@ public class Dictionary {
 	 * @return true if s was not already inserted, false otherwise
 	 */
 	public boolean add(String s, Transaction t) {
+		System.out.println(s);
 		if (s != "") {
 			try {
 				Node node = start.read(t);
@@ -124,5 +129,50 @@ public class Dictionary {
 		emptyAbsent = false;
 		return result;
 	}
-	
+
+	/**
+	 * Get all words contained in the Dictionary
+	 * @return All words
+	 */
+	public List<String> getWords() {
+		Transaction t = new TransactionTL2();
+		while (!t.isCommited()) {
+			t.begin();
+
+			try {
+				List<String> result =  getAllNodeWords(start, t);
+				t.try_to_commit();
+				return result;
+			} catch (AbortException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	private List<String> getAllNodeWords(Register<Node> node, Transaction t) throws AbortException {
+		List<String> words = new ArrayList<>();
+		words.add("");
+
+		// Get full word
+		while (node != null) {
+			// System.out.println(words.get(0));
+			// System.out.println(node.read(t).character);
+			words.set(0, words.get(0) + node.read(t).suffix);
+
+			if (!node.read(t).absent && node.read(t).suffix != null) {
+				words.add(words.get(0));
+			}
+
+			// Add all nexts
+			Register<Node> next = node.read(t).next;
+			while (next != null) {
+				words.addAll(getAllNodeWords(next, t));
+				next = node.read(t).next;
+			}
+
+			node = node.read(t).suffix;
+		}
+
+		return words;
+	}
 }
