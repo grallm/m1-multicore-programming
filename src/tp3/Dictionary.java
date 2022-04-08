@@ -48,8 +48,9 @@ public class Dictionary {
 		final Register<Node> next;
 
 		Node(char character, Register<Node> next) {
-			this.character = character; 
-			this.next = next;
+			this.character = character;
+			// No null
+			this.next = (next == null) ? new RegisterTL2<>(null) : next;
 		}
 
 		/**
@@ -72,9 +73,7 @@ public class Dictionary {
 			// Second case: the next character in the string was found, but this is not the end of the string
 			// We continue in member "suffix"
 			if(s.charAt(depth) == character) {
-				if (suffix.read(t) == null) {
-					suffix.write(t, new Node(s.charAt(depth+1), new RegisterTL2<>(null)));
-				} else if (suffix.read(t).character > s.charAt(depth+1)) {
+				if (suffix.read(t) == null || suffix.read(t).character > s.charAt(depth+1)) {
 					suffix.write(t, new Node(s.charAt(depth+1), suffix));
 				}
 
@@ -84,9 +83,7 @@ public class Dictionary {
 			// Third case: the next character in the string was not found
 			// We continue in member "next"
 			// To maintain the order, we may have to add a new node before "next" first
-			if (next.read(t) == null) {
-				next.write(t, new Node(s.charAt(depth), new RegisterTL2<>(null)));
-			} else if (next.read(t).character > s.charAt(depth)) {
+			if (next.read(t) == null || next.read(t).character > s.charAt(depth)) {
 				next.write(t, new Node(s.charAt(depth), next));
 			}
 
@@ -96,7 +93,7 @@ public class Dictionary {
 	}
 
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
-	private final Register<Node> start = new RegisterTL2<>(new Node('\0', new RegisterTL2<>(null)));
+	private final Register<Node> start = new RegisterTL2<>(new Node('\0', null));
 	// The empty string is stored separately
 	private boolean emptyAbsent = true;
 
