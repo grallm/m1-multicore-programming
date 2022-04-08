@@ -43,7 +43,7 @@ public class TransactionTL2 implements ITransactionTL2
      * Set a copy with original register as key
      */
     @Override
-    public void putCopy(IRegisterTL2<?> original, IRegisterTL2<?> copy)
+    public void putCopy(IRegisterTL2<?> original,  copy)
     {
         lc.put(original, copy);
     }

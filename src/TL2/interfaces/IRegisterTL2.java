@@ -5,7 +5,7 @@ import TL2.AbortException;
 import java.util.Date;
 
 
-public interface IRegisterTL2<T> extends Register<T>, Comparable<IRegisterTL2<T>>, Cloneable
+public interface IRegisterTL2<T> extends Register<T>, Comparable<IRegisterTL2<T>>
 {
     boolean isLocked();
 

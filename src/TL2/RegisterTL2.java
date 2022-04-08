@@ -3,12 +3,13 @@ package TL2;
 import TL2.interfaces.*;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RegisterTL2<T> implements IRegisterTL2<T>
 {
-    private T value;
+    private final AtomicReference<T> value;
     private Date date;
     private final Lock lock;
     private boolean isLocked;
@@ -17,7 +18,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
      * Constructor
      */
     public RegisterTL2(T value) {
-        this.value = value;
+        this.value = new AtomicReference<>(value);
         this.date = new Date();
 
         // true to have starvation-freedom
@@ -48,12 +49,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
 
     public T getValue()
     {
-        return value;
+        return value.get();
     }
 
     public void setValue(T value)
     {
-        this.value = (T) value;
+        this.value.set(value);
     }
 
     public T read(Transaction t) throws AbortException {
@@ -91,26 +92,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     }
     public void write(ITransactionTL2 t, T v) throws AbortException
     {
-        try {
-        t.putCopy(this, (IRegisterTL2<?>) this.clone());
+        t.putCopy(this, new RegisterTL2<>(v));
         t.addToLws(this);
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            throw new AbortException("Can't clone this register");
-        }
     }
 
     @Override
     public int compareTo(IRegisterTL2<T> o) {
         return this.hashCode() > o.hashCode() ? 1 : -1;
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        RegisterTL2<T> clone = (RegisterTL2<T>) super.clone();
-
-        clone.date = (Date) this.date.clone();
-        clone.value = this.getValue();
-        return clone;
     }
 }
