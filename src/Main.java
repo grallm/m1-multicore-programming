@@ -14,14 +14,13 @@ public class Main
         String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
         Dictionary dic = new Dictionary();
 
-        // for (String str : dicWords)
-        // {
-        //     // add to threapool
-        //     Transaction t = new TransactionTL2();
-        //     Task task = new Task(str, t);
-        //     threadPool.execute(task);
-        // }
-        try {
+         for (String str : dicWords)
+         {
+             Transaction t = new TransactionTL2();
+             Task task = new Task(str, t, dic);
+             threadPool.execute(task);
+         }
+        /*try {
             for (String str : dicWords) {
                 Transaction t = new TransactionTL2();
                 while (!t.isCommited()) {
@@ -32,7 +31,7 @@ public class Main
             }
         } catch (AbortException e) {
             e.printStackTrace();
-        }
+        }*/
 
         System.out.println(dic.getWords());
     }

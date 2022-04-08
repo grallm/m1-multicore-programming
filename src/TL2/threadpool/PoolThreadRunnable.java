@@ -21,7 +21,6 @@ public class PoolThreadRunnable implements Runnable
 
     public void run()
     {
-        Dictionary dic = new Dictionary();
         this.thread = Thread.currentThread();
 
         while (!isStopped())
@@ -34,6 +33,7 @@ public class PoolThreadRunnable implements Runnable
                     runnable.run();
                     Transaction t = runnable.get().transaction;
                     String str = runnable.get().string;
+                    Dictionary dic = runnable.get().dictionary;
 
                     while (!t.isCommited())
                     {
