@@ -40,7 +40,7 @@ public class PoolThreadRunnable implements Runnable
                         try
                         {
                             t.begin();
-                            dic.add(str, t);
+                            dic.add(str/*, t*/);
                             t.try_to_commit();
                         }
                         catch (AbortException e)

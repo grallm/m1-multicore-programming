@@ -38,20 +38,24 @@ public class Main
          //         }
          //     });
          // }
-        try {
-            for (String str : dicWords) {
-                Transaction t = new TransactionTL2();
-                while (!t.isCommited()) {
-                    t.begin();
-                    dic.add(str, t);
-                    t.try_to_commit();
-                }
-            }
-        } catch (AbortException e) {
-            e.printStackTrace();
+        // try {
+        //     for (String str : dicWords) {
+        //         Transaction t = new TransactionTL2();
+        //         while (!t.isCommited()) {
+        //             t.begin();
+        //             dic.add(str);
+        //             t.try_to_commit();
+        //         }
+        //     }
+        // } catch (AbortException e) {
+        //     e.printStackTrace();
+        // }
+        for (String str : dicWords) {
+            dic.add(str);
         }
 
         System.out.println("Result :");
-        System.out.println(dic.getWords());
+        // System.out.println(dic.getWords());
+        System.out.println(dic.toString());
     }
 }
