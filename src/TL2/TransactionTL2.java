@@ -15,11 +15,11 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
     /**
      * All written variables
      */
-    private SortedSet<IRegisterTL2<?>> lws;
+    private SortedSet<IRegisterTL2<T>> lws;
     /**
      * All read variables
      */
-    private List<IRegisterTL2<?>> lrs;
+    private List<IRegisterTL2<T>> lrs;
     /**
      * All local variables
      * <p>
@@ -31,6 +31,11 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
     public void addToLws(IRegisterTL2<T> original)
     {
         lws.add(original);
+    }
+
+    public void addToLrs(IRegisterTL2<T> original)
+    {
+        lrs.add(original);
     }
 
     @Override

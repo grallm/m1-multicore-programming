@@ -14,15 +14,14 @@ public class Main
 
     public static void main(String[] args)
     {
-        threadPool = Executors.newFixedThreadPool(10);
+        // threadPool = Executors.newFixedThreadPool(10);
         String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
         Dictionary dic = new Dictionary();
 
          for (String str : dicWords)
          {
-             Transaction t = new TransactionTL2();
-             Task task = new Task(str, t, dic);
-             threadPool.submit(() -> {
+             Transaction t = new TransactionTL2<>();
+             // threadPool.submit(() -> {
                  while (!t.isCommited())
                  {
                      try
@@ -36,7 +35,7 @@ public class Main
                          e.printStackTrace();
                      }
                  }
-             });
+             // });
          }
 
         System.out.println("Result :");

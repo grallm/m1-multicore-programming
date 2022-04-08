@@ -41,7 +41,7 @@ public class Dictionary {
 		boolean absent = true;
 		// Encodes the set of strings starting with the string leading to this word, 
 		// including the character encoded by this node
-		Register<Node> suffix = null;
+		Register<Node> suffix = new RegisterTL2<>(null);
 		// Encodes the set of strings starting with the string leading to this word, 
 		// excluding the character encoded by this node, 
 		// and whose next character is strictly greater than the character encoded by this node
@@ -72,31 +72,21 @@ public class Dictionary {
 			// Second case: the next character in the string was found, but this is not the end of the string
 			// We continue in member "suffix"
 			if(s.charAt(depth) == character) {
-				if (suffix == null) {
-					suffix = new RegisterTL2<>(new Node(s.charAt(depth+1), null));
-				} else if (suffix.read(t).character > s.charAt(depth+1)){
+				if (suffix == null || suffix.read(t).character > s.charAt(depth+1)) {
 					suffix.write(t, new Node(s.charAt(depth+1), suffix));
 				}
 
-				Node node = suffix.read(t);
-				boolean result = node.add(s, depth+1, t);
-				suffix.write(t, node);
-				return result;
+				return suffix.read(t).add(s, depth+1, t);
 			}
 
 			// Third case: the next character in the string was not found
 			// We continue in member "next"
 			// To maintain the order, we may have to add a new node before "next" first
-			if (next == null) {
-				next = new RegisterTL2<>(new Node(s.charAt(depth), null));
-			} else if (next.read(t).character > s.charAt(depth)){
+			if (next == null || next.read(t).character > s.charAt(depth)) {
 				next.write(t, new Node(s.charAt(depth), next));
 			}
 
-			Node node = next.read(t);
-			boolean result = node.add(s, depth, t);
-			next.write(t, node);
-			return result;
+			return next.read(t).add(s, depth, t);
 		}
 	
 	}
@@ -135,7 +125,7 @@ public class Dictionary {
 	 * @return All words
 	 */
 	public List<String> getWords() {
-		Transaction t = new TransactionTL2();
+		Transaction t = new TransactionTL2<Node>();
 		while (!t.isCommited()) {
 			t.begin();
 

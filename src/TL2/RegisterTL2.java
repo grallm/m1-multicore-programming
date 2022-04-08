@@ -68,16 +68,10 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
         if (local != null) {
             return (T) local.getValue();
         } else {
-            IRegisterTL2<?> copy = null;
-            try {
-                copy = (IRegisterTL2<?>) this.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-                throw new AbortException("Can't clone this register");
-            }
+            IRegisterTL2<T> copy = new RegisterTL2<T>(this.value.get());
 
             t.putCopy(this, copy);
-            t.addToLws(this);
+            t.addToLrs(this);
 
             if (copy.getDate().after(t.getBirthDate())) {
                 throw new AbortException("Copied date is after transaction birth date");

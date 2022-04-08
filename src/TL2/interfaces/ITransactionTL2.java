@@ -9,6 +9,7 @@ public interface ITransactionTL2<T> extends Transaction
     IRegisterTL2<T> getCopy(IRegisterTL2<T> original);
 
     void addToLws(IRegisterTL2<T> original);
+    void addToLrs(IRegisterTL2<T> original);
 
     Date getBirthDate();
 
