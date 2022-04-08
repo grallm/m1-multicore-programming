@@ -61,9 +61,13 @@ public class Dictionary {
 		 * @return true if s was not already inserted, false otherwise
 		 */
 		boolean add(String s, int depth, Transaction t) throws AbortException {
+			// System.out.println(s);
+			// System.out.println(depth);
+			System.out.println(s.charAt(depth));
 
 			// First case: we are at the end of the string and this is the correct node
 			if(depth >= s.length() || (s.charAt(depth) == character) && depth == s.length() - 1) {
+				// System.out.println("fin");
 				boolean result = absent;
 				absent = false;
 				return result;
@@ -72,6 +76,7 @@ public class Dictionary {
 			// Second case: the next character in the string was found, but this is not the end of the string
 			// We continue in member "suffix"
 			if(s.charAt(depth) == character) {
+				// System.out.println("suffix");
 				if (suffix == null) {
 					suffix = new RegisterTL2<>(new Node(s.charAt(depth+1), null));
 				} else if (suffix.read(t).character > s.charAt(depth+1)){
@@ -88,14 +93,17 @@ public class Dictionary {
 			// We continue in member "next"
 			// To maintain the order, we may have to add a new node before "next" first
 			if (next == null) {
+				// System.out.println("next1");
 				next = new RegisterTL2<>(new Node(s.charAt(depth), null));
 			} else if (next.read(t).character > s.charAt(depth)){
+				// System.out.println("next2");
 				next.write(t, new Node(s.charAt(depth), next));
 			}
 
 			Node node = next.read(t);
 			boolean result = node.add(s, depth, t);
 			next.write(t, node);
+			// System.out.println("write");
 			return result;
 		}
 	
@@ -114,7 +122,7 @@ public class Dictionary {
 	 * @return true if s was not already inserted, false otherwise
 	 */
 	public boolean add(String s, Transaction t) {
-		System.out.println(s);
+		// System.out.println(s);
 		if (s != "") {
 			try {
 				Node node = start.read(t);
@@ -140,7 +148,7 @@ public class Dictionary {
 			t.begin();
 
 			try {
-				List<String> result =  getAllNodeWords(start, t);
+				List<String> result =  getAllNodeWords(start, t, 0);
 				t.try_to_commit();
 				return result;
 			} catch (AbortException e) {
@@ -149,14 +157,16 @@ public class Dictionary {
 		}
 		return null;
 	}
-	private List<String> getAllNodeWords(Register<Node> node, Transaction t) throws AbortException {
+	private List<String> getAllNodeWords(Register<Node> node, Transaction t, int depth) throws AbortException {
 		List<String> words = new ArrayList<>();
 		words.add("");
+		System.out.println(depth);
+		System.out.println(node.hashCode());
 
 		// Get full word
 		while (node != null) {
 			// System.out.println(words.get(0));
-			// System.out.println(node.read(t).character);
+			System.out.println(node.read(t).character);
 			words.set(0, words.get(0) + node.read(t).suffix);
 
 			if (!node.read(t).absent && node.read(t).suffix != null) {
@@ -166,11 +176,15 @@ public class Dictionary {
 			// Add all nexts
 			Register<Node> next = node.read(t).next;
 			while (next != null) {
-				words.addAll(getAllNodeWords(next, t));
+				// words.addAll(getAllNodeWords(next, t, depth+1));
 				next = node.read(t).next;
+				System.out.println("next");
+				System.out.println(next.read(t).character);
+				// System.out.println(next);
 			}
 
 			node = node.read(t).suffix;
+			System.out.println(node.read(t).character);
 		}
 
 		return words;

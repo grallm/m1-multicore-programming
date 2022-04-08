@@ -62,14 +62,15 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     public T read(ITransactionTL2 t) throws AbortException
     {
         IRegisterTL2<?> local = t.getCopy(this);
+        // System.out.println("read " + this);
 
         // Return local's value, if exists
         if (local != null) {
             return (T) local.getValue();
         } else {
-            IRegisterTL2<?> copy = null;
+            IRegisterTL2<T> copy = null;
             try {
-                copy = (IRegisterTL2<?>) this.clone();
+                copy = (IRegisterTL2<T>) this.clone();
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 throw new AbortException("Can't clone this register");
@@ -78,6 +79,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
             t.putCopy(this, copy);
             t.addToLws(this);
 
+            // System.out.println(this.date.toInstant().toEpochMilli());
+            // System.out.println(copy.getDate().toInstant().toEpochMilli());
+            // System.out.println(t.getBirthDate().toInstant().toEpochMilli());
+            // System.out.println(copy.getDate().after(t.getBirthDate()));
+            // System.out.println(copy.getDate().before(t.getBirthDate()));
+            // System.out.println(copy.getDate().compareTo(t.getBirthDate()));
             if (copy.getDate().after(t.getBirthDate())) {
                 throw new AbortException("Copied date is after transaction birth date");
             }
@@ -92,8 +99,8 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     public void write(ITransactionTL2 t, T v) throws AbortException
     {
         try {
-        t.putCopy(this, (IRegisterTL2<?>) this.clone());
-        t.addToLws(this);
+            t.putCopy(this, (IRegisterTL2<?>) this.clone());
+            t.addToLws(this);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             throw new AbortException("Can't clone this register");
@@ -107,6 +114,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
+        System.out.println("clone");
         RegisterTL2<T> clone = (RegisterTL2<T>) super.clone();
 
         clone.date = (Date) this.date.clone();

@@ -14,30 +14,42 @@ public class Main
 
     public static void main(String[] args)
     {
-        threadPool = Executors.newFixedThreadPool(10);
-        String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
+        // threadPool = Executors.newFixedThreadPool(10);
+        String[] dicWords = {"chameau"/*, "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"*/};
         Dictionary dic = new Dictionary();
 
-         for (String str : dicWords)
-         {
-             Transaction t = new TransactionTL2();
-             Task task = new Task(str, t, dic);
-             threadPool.submit(() -> {
-                 while (!t.isCommited())
-                 {
-                     try
-                     {
-                         t.begin();
-                         dic.add(str, t);
-                         t.try_to_commit();
-                     }
-                     catch (AbortException e)
-                     {
-                         e.printStackTrace();
-                     }
-                 }
-             });
-         }
+         // for (String str : dicWords)
+         // {
+         //     Transaction t = new TransactionTL2();
+         //     Task task = new Task(str, t, dic);
+         //     threadPool.submit(() -> {
+         //         while (!t.isCommited())
+         //         {
+         //             try
+         //             {
+         //                 t.begin();
+         //                 dic.add(str, t);
+         //                 t.try_to_commit();
+         //             }
+         //             catch (AbortException e)
+         //             {
+         //                 e.printStackTrace();
+         //             }
+         //         }
+         //     });
+         // }
+        try {
+            for (String str : dicWords) {
+                Transaction t = new TransactionTL2();
+                while (!t.isCommited()) {
+                    t.begin();
+                    dic.add(str, t);
+                    t.try_to_commit();
+                }
+            }
+        } catch (AbortException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("Result :");
         System.out.println(dic.getWords());
