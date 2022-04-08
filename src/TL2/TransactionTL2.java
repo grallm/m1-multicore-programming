@@ -5,7 +5,7 @@ import TL2.interfaces.ITransactionTL2;
 
 import java.util.*;
 
-public class TransactionTL2 implements ITransactionTL2
+public class TransactionTL2<T> implements ITransactionTL2<T>
 {
     /**
      * Transaction start date
@@ -25,10 +25,10 @@ public class TransactionTL2 implements ITransactionTL2
      * <p>
      * Map<Original register, Copy register>
      */
-    private Map<IRegisterTL2<?>, IRegisterTL2<?>> lc;
+    private Map<IRegisterTL2<T>, IRegisterTL2<T>> lc;
 
     @Override
-    public void addToLws(IRegisterTL2<?> original)
+    public void addToLws(IRegisterTL2<T> original)
     {
         lws.add(original);
     }
@@ -43,13 +43,13 @@ public class TransactionTL2 implements ITransactionTL2
      * Set a copy with original register as key
      */
     @Override
-    public void putCopy(IRegisterTL2<?> original,  copy)
+    public void putCopy(IRegisterTL2<T> original, IRegisterTL2<T> copy)
     {
         lc.put(original, copy);
     }
 
     @Override
-    public IRegisterTL2<?> getCopy(IRegisterTL2<?> original)
+    public IRegisterTL2<T> getCopy(IRegisterTL2<T> original)
     {
         return lc.get(original);
     }
