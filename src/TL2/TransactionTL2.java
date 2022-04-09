@@ -88,6 +88,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
                 {
                     registerLws.unlock();
                 }
+                System.out.println(register.read(this));
                 throw new AbortException("Register is locked or register date is after birth date");
             }
         }

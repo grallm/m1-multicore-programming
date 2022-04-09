@@ -60,6 +60,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     public T read(ITransactionTL2 t) throws AbortException
     {
         IRegisterTL2<?> local = t.getCopy(this);
+        System.out.println(local == null);
 
         // Return local's value, if exists
         if (local != null) {
@@ -83,7 +84,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     }
     public void write(ITransactionTL2 t, T v) throws AbortException
     {
-        t.putCopy(this, new RegisterTL2<>(v));
+        IRegisterTL2<T> local = t.getCopy(this);
+        if (local == null) {
+            t.putCopy(this, new RegisterTL2<>(v));
+        } else {
+            local.setValue(v);
+        }
         t.addToLws(this);
     }
 

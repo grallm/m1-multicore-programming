@@ -32,13 +32,13 @@ public class Main
                      }
                      catch (AbortException e)
                      {
-                         // e.printStackTrace();
+                         e.printStackTrace();
                      }
                  }
              // });
          }
 
         System.out.println("Result :");
-        System.out.println(dic);
+        // System.out.println(dic);
     }
 }
