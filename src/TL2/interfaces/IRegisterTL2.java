@@ -12,14 +12,14 @@ public interface IRegisterTL2<T> extends Register<T>, Comparable<IRegisterTL2<T>
     void lock();
     void unlock();
 
-    Date getDate();
-
-    void setDate(Date date);
+    int getDate();
 
     T getValue();
 
     void setValue(T value);
 
-    T read(ITransactionTL2 t) throws AbortException;
-    void write(ITransactionTL2 t, T v) throws AbortException;
+    T readTL2(ITransactionTL2<T> t) throws AbortException;
+    void writeTL2(ITransactionTL2<T> t, T v) throws AbortException;
+
+    void setDate(int commitDate);
 }

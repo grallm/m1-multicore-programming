@@ -2,15 +2,14 @@ package TL2;
 
 import TL2.interfaces.*;
 
-import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RegisterTL2<T> implements IRegisterTL2<T>
 {
     private final AtomicReference<T> value;
-    private Date date;
+    private volatile AtomicInteger date;
     private final ReentrantLock lock;
 
     /**
@@ -18,7 +17,15 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
      */
     public RegisterTL2(T value) {
         this.value = new AtomicReference<>(value);
-        this.date = new Date();
+        this.date = new AtomicInteger(0);
+
+        // true to have starvation-freedom
+        this.lock = new ReentrantLock(true);
+    }
+
+    public RegisterTL2(T value, int date) {
+        this.value = new AtomicReference<>(value);
+        this.date = new AtomicInteger(date);
 
         // true to have starvation-freedom
         this.lock = new ReentrantLock(true);
@@ -34,14 +41,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
         return lock.isLocked();
     }
 
-    public Date getDate()
-    {
-        return date;
+    public int getDate() {
+        return date.get();
     }
 
-    public void setDate(Date date)
-    {
-        this.date = date;
+    public void setDate(int date) {
+        this.date.set(date);
     }
 
     public T getValue()
@@ -54,36 +59,48 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
         this.value.set(value);
     }
 
-    public T read(Transaction t) throws AbortException {
-        return this.read((TransactionTL2<?>) t);
-    }
-    public T read(ITransactionTL2 t) throws AbortException
+    public T read(Transaction<T> t) throws AbortException
     {
-        IRegisterTL2<?> local = t.getCopy(this);
+        return this.readTL2((ITransactionTL2<T>) t);
+    }
+    public T readTL2(ITransactionTL2<T> t) throws AbortException
+    {
+        IRegisterTL2<T> local = t.getCopy(this);
 
         // Return local's value, if exists
-        if (local != null) {
-            return (T) local.getValue();
-        } else {
-            IRegisterTL2<T> copy = new RegisterTL2<T>(this.value.get());
+        if (local == null)
+        {
+            local = new RegisterTL2<>(getValue(), getDate());
 
-            t.putCopy(this, copy);
+            t.putCopy(this, local);
             t.addToLrs(this);
 
-            if (copy.getDate().after(t.getBirthDate())) {
+            if (local.getDate() > t.getBirthDate())
+            {
                 throw new AbortException("Copied date is after transaction birth date");
             }
 
-            return (T) copy.getValue();
         }
+        return local.getValue();
     }
 
-    public void write(Transaction t, T v) throws AbortException {
-        this.write((TransactionTL2) t, v);
+    public void write(Transaction<T> t, T v) throws AbortException {
+        this.writeTL2((ITransactionTL2<T>) t, v);
     }
-    public void write(ITransactionTL2 t, T v) throws AbortException
+    public void writeTL2(ITransactionTL2<T> t, T v)
     {
-        t.putCopy(this, new RegisterTL2<>(v));
+        if(t.getCopy(this) == null) // There is no local copy of this register
+        {
+            t.putCopy(this, new RegisterTL2<>(getValue(), getDate()));
+        }
+
+        IRegisterTL2<T> local = t.getCopy(this);
+        // TODO: use proper compareTo
+        if(local.getDate() == getDate() && local.getValue() == getValue()) // The local copy is the same as the current value
+        {
+            t.putCopy(this, new RegisterTL2<>(v, getDate()));
+        }
+
         t.addToLws(this);
     }
 

@@ -12,6 +12,7 @@ import TL2.interfaces.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An implementation of a set of strings based on a dictionary. 
@@ -36,21 +37,23 @@ public class Dictionary {
 	private static class Node {
 
 		// The character of the string encoded in this node of the dictionary
-		char character;
+		final char character;
 		// True if the string leading to this node has already been inserted, false otherwise
-		boolean absent = true;
+		AtomicBoolean absent;
 		// Encodes the set of strings starting with the string leading to this word, 
 		// including the character encoded by this node
-		final Register<Node> suffix = new RegisterTL2<>(null);
+		volatile Register<Node> suffix;
 		// Encodes the set of strings starting with the string leading to this word, 
 		// excluding the character encoded by this node, 
 		// and whose next character is strictly greater than the character encoded by this node
-		final Register<Node> next;
+		volatile Register<Node> next;
 
-		Node(char character, Register<Node> next) {
+		Node(char character, Node next) {
 			this.character = character;
+			this.absent = new AtomicBoolean(true);
 			// No null
-			this.next = (next == null) ? new RegisterTL2<>(null) : next;
+			this.next = new RegisterTL2<>(next);
+			this.suffix = new RegisterTL2<>(null);
 		}
 
 		/**
@@ -61,21 +64,22 @@ public class Dictionary {
 		 * @param depth The number of time the pointer "suffix" has been followed
 		 * @return true if s was not already inserted, false otherwise
 		 */
-		boolean add(String s, int depth, Transaction t) throws AbortException {
-			System.out.println(s.charAt(depth));
+		boolean add(String s, int depth, Transaction<Node> t) throws AbortException {
+			//System.out.println(s.charAt(depth));
 
 			// First case: we are at the end of the string and this is the correct node
 			if(depth >= s.length() || (s.charAt(depth) == character) && depth == s.length() - 1) {
-				boolean result = absent;
-				absent = false;
+				boolean result = absent.get();
+				absent.set(false);
 				return result;
 			}
 
 			// Second case: the next character in the string was found, but this is not the end of the string
 			// We continue in member "suffix"
+			Node nodeSuffix = suffix.read(t);
 			if(s.charAt(depth) == character) {
-				if (suffix.read(t) == null || suffix.read(t).character > s.charAt(depth+1)) {
-					suffix.write(t, new Node(s.charAt(depth+1), suffix));
+				if (nodeSuffix == null || nodeSuffix.character > s.charAt(depth+1)) {
+					suffix.write(t, new Node(s.charAt(depth+1), nodeSuffix));
 				}
 
 				return suffix.read(t).add(s, depth+1, t);
@@ -84,14 +88,15 @@ public class Dictionary {
 			// Third case: the next character in the string was not found
 			// We continue in member "next"
 			// To maintain the order, we may have to add a new node before "next" first
-			if (next.read(t) == null || next.read(t).character > s.charAt(depth)) {
-				next.write(t, new Node(s.charAt(depth), next));
+			Node nodeNext = next.read(t);
+			if (nodeNext == null || nodeNext.character > s.charAt(depth)) {
+				next.write(t, new Node(s.charAt(depth), nodeNext));
 			}
 
 			return next.read(t).add(s, depth, t);
 		}
 
-		public String prettyPrint(String prefix, Transaction t) throws AbortException {
+/*		public String prettyPrint(String prefix, Transaction<Node> t) throws AbortException {
 			String futurePrefix = String.format("%s\t", prefix);
 			return String.format("%schar : %s%n%sabsent : %s%n%ssuffix : %s%n%snext : %s",
 					prefix, character, prefix, absent, prefix,
@@ -100,8 +105,24 @@ public class Dictionary {
 					prefix,
 					next.read(t) != null ? String.format("%n%s",
 							next.read(t).prettyPrint(futurePrefix, t)) : "null");
+		}*/
+
+		public void printNode(String s, Transaction<Node> t) throws AbortException {
+			if (!this.absent.get()) {
+				System.out.println(s + this.character + "|");
+			} else
+				System.out.println(s + this.character);
+			if (this.suffix.read(t) != null) {
+				this.suffix.read(t).printNode(s + " ", t);
+
+			}
+			if (this.next.read(t) != null) {
+				this.next.read(t).printNode(s + "", t);
+			}
+
 		}
 
+/*
 		@Override
 		public String toString() {
 			Transaction t = new TransactionTL2<>();
@@ -116,11 +137,11 @@ public class Dictionary {
 				}
 			}
 			return result;
-		}
+		}*/
 	}
 
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
-	private final Register<Node> start = new RegisterTL2<>(new Node('\0', null));
+	private final Node start = new Node('\0', null);
 	// The empty string is stored separately
 	private boolean emptyAbsent = true;
 
@@ -131,31 +152,57 @@ public class Dictionary {
 	 * @param s The string that is being inserted in the set
 	 * @return true if s was not already inserted, false otherwise
 	 */
-	public boolean add(String s, Transaction t) throws AbortException {
-		// System.out.println(s);
+	public boolean add(String s) throws AbortException {
+		boolean result = false;
 		if (s != "") {
-			Node node = start.read(t);
-			boolean result = node.add(s, 0, t);
-			start.write(t, node);
+			TransactionTL2<Node> t = new TransactionTL2<>();
+			while (!t.isCommited()) {
+				try {
+					t.begin();
+					result = start.add(s, 0, t);
+					t.try_to_commit();
+				}
+				catch (AbortException e) {
+					e.printStackTrace();
+				}
+			}
+
 			return result;
 		}
-		boolean result = emptyAbsent;
+		result = emptyAbsent;
 		emptyAbsent = false;
 		return result;
+	}
+
+	public void print()
+	{
+		TransactionTL2<Node> t = new TransactionTL2<>();
+		while (!t.isCommited()) {
+			try {
+				t.begin();
+				start.printNode("", t);
+				t.try_to_commit();
+			}
+			catch (AbortException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
 	 * Get all words contained in the Dictionary
 	 * @return All words
 	 */
-	public List<String> getWords() {
+/*	public List<String> getWords() {
 		Transaction t = new TransactionTL2<Node>();
 		while (!t.isCommited()) {
-			t.begin();
+
 
 			try {
+				t.begin();
 				List<String> result =  getAllNodeWords(start, t);
 				t.try_to_commit();
+				System.out.println("get words return : " + result);
 				return result;
 			} catch (AbortException e) {
 				e.printStackTrace();
@@ -166,6 +213,7 @@ public class Dictionary {
 	private List<String> getAllNodeWords(Register<Node> node, Transaction t) throws AbortException {
 		List<String> words = new ArrayList<>();
 		words.add("");
+		System.out.println("call get all node words");
 
 		// Get full word
 		while (node != null) {
@@ -187,22 +235,7 @@ public class Dictionary {
 			node = node.read(t).suffix;
 		}
 
+		System.out.println("get all node words return : " + words);
 		return words;
-	}
-
-	@Override
-	public String toString() {
-		Transaction t = new TransactionTL2<>();
-		String result = null;
-		while (!t.isCommited()) {
-			try {
-				t.begin();
-				result =  this.start.read(t).toString();
-				t.try_to_commit();
-			} catch (AbortException e) {
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
+	}*/
 }

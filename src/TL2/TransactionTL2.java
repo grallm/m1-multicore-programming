@@ -2,6 +2,7 @@ package TL2;
 
 import TL2.interfaces.IRegisterTL2;
 import TL2.interfaces.ITransactionTL2;
+import TL2.utils.ClockManager;
 
 import java.util.*;
 
@@ -10,8 +11,8 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
     /**
      * Transaction start date
      */
-    private Date birthDate;
-    private Date commitDate;
+    private int birthDate;
+    boolean isCommited;
     /**
      * All written variables
      */
@@ -39,7 +40,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
     }
 
     @Override
-    public Date getBirthDate()
+    public int getBirthDate()
     {
         return birthDate;
     }
@@ -62,50 +63,78 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
     @Override
     public void begin()
     {
-        birthDate = new Date();
+        birthDate = ClockManager.clock.get();
+        isCommited = false;
         lws = new TreeSet<>();
         lrs = new ArrayList<>();
         lc = new HashMap<>();
-        commitDate = null;
     }
 
     @Override
     public synchronized void try_to_commit() throws AbortException
     {
         // Lock all lws
-        for (IRegisterTL2<?> register : lws)
+        for (IRegisterTL2<T> register : lws)
         {
             register.lock();
         }
 
         // Check if no lrs are locked and date compatibility
-        for (IRegisterTL2<?> register : lrs)
+        for (IRegisterTL2<T> register : lrs)
         {
-            if (register.isLocked() || register.getDate().after(this.birthDate))
+            if (register.isLocked())
             {
                 // Release all locks and abort
-                for (IRegisterTL2<?> registerLws : lws)
-                {
-                    registerLws.unlock();
-                }
-                throw new AbortException("Register is locked or register date is after birth date");
+                releaseLocks();
+                throw new AbortException("Abort: register is locked");
             }
         }
 
-        commitDate = new Date();
+        // Check lock date compatibility
+        for (IRegisterTL2<T> register : lrs)
+        {
+            if (register.getDate() > birthDate)
+            {
+                // Release all locks and abort
+                releaseLocks();
+                throw new AbortException("Abort: Date is not compatible");
+            }
+        }
+
+        int commitDate = ClockManager.clock.incrementAndGet();
 
         // Update value and date of Write registers
         for (IRegisterTL2<T> register : lws)
         {
             register.setValue(lc.get(register).getValue());
             register.setDate(commitDate);
-            register.unlock();
         }
+
+        // clear lc here ?
+
+        releaseLocks();
+
+        isCommited = true;
     }
 
     @Override
     public boolean isCommited()
     {
-        return commitDate != null;
+        return isCommited;
+    }
+
+    private void releaseLocks()
+    {
+        for (IRegisterTL2<T> register : lws)
+        {
+            if (register.isLocked())
+                register.unlock();
+        }
+
+        for (IRegisterTL2<T> register : lrs)
+        {
+            if (register.isLocked())
+                register.unlock();
+        }
     }
 }

@@ -3,6 +3,7 @@ import TL2.TransactionTL2;
 import TL2.interfaces.Transaction;
 import TL2.threadpool.Task;
 import TL2.threadpool.ThreadPool;
+import TL2.utils.ClockManager;
 import tp3.Dictionary;
 
 import java.util.concurrent.ExecutorService;
@@ -12,33 +13,18 @@ public class Main
 {
     private static volatile ExecutorService threadPool;
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws AbortException
     {
-        // threadPool = Executors.newFixedThreadPool(10);
-        String[] dicWords = {"chameau"/*, "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"*/};
+        final ClockManager clock = new ClockManager();
+        String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
         Dictionary dic = new Dictionary();
 
          for (String str : dicWords)
          {
-             Transaction t = new TransactionTL2<>();
-             // threadPool.submit(() -> {
-                 while (!t.isCommited())
-                 {
-                     try
-                     {
-                         t.begin();
-                         dic.add(str, t);
-                         t.try_to_commit();
-                     }
-                     catch (AbortException e)
-                     {
-                         // e.printStackTrace();
-                     }
-                 }
-             // });
+             dic.add(str);
          }
 
         System.out.println("Result :");
-        System.out.println(dic);
+        dic.print();
     }
 }
