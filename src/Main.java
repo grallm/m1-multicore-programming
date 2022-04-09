@@ -18,10 +18,12 @@ public class Main
         final ClockManager clock = new ClockManager();
         String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
         Dictionary dic = new Dictionary();
+        ThreadPool threadPool = new ThreadPool(10);
 
          for (String str : dicWords)
          {
-             dic.add(str);
+             //dic.add(str);
+             threadPool.execute(new Task(str, dic));
          }
 
         System.out.println("Result :");

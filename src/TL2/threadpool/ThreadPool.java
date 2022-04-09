@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 
 public class ThreadPool
 {
-    private BlockingQueue<FutureTask<?>> queue;
+    private BlockingQueue<FutureTask<Dictionary>> queue;
     private List<PoolThreadRunnable> runnables = new ArrayList<>();
     private boolean isStopped = false;
 
@@ -32,12 +32,13 @@ public class ThreadPool
         }
     }
 
-    public synchronized void execute(Task t) throws IllegalStateException
+    public synchronized FutureTask<Dictionary> execute(Task t) throws IllegalStateException
     {
-        FutureTask<Task> futureTask = new FutureTask<>(t);
+        FutureTask<Dictionary> futureTask = new FutureTask<>(t);
         queue.offer(futureTask);
         if (this.isStopped) throw
                 new IllegalStateException("ThreadPool is stopped");
+        return futureTask;
     }
 
     public synchronized void stop()

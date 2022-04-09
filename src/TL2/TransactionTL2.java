@@ -82,7 +82,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
         // Check if no lrs are locked and date compatibility
         for (IRegisterTL2<T> register : lrs)
         {
-            if (register.isLocked())
+            if (register.isLocked() && lws.contains(register))
             {
                 // Release all locks and abort
                 releaseLocks();
@@ -93,6 +93,8 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
         // Check lock date compatibility
         for (IRegisterTL2<T> register : lrs)
         {
+            // System.out.println("Register date: " + register.getDate());
+            // System.out.println("Transaction date: " + birthDate);
             if (register.getDate() > birthDate)
             {
                 // Release all locks and abort
@@ -110,7 +112,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
             register.setDate(commitDate);
         }
 
-        // clear lc here ?
+        // TODO: clear lc here ? needed ?
 
         releaseLocks();
 

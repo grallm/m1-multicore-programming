@@ -67,9 +67,10 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     {
         IRegisterTL2<T> local = t.getCopy(this);
 
-        // Return local's value, if exists
+        // There is no local copy of this register
         if (local == null)
         {
+            // Local become a copy
             local = new RegisterTL2<>(getValue(), getDate());
 
             t.putCopy(this, local);
