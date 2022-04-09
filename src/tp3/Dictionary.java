@@ -62,6 +62,7 @@ public class Dictionary {
 		 * @return true if s was not already inserted, false otherwise
 		 */
 		boolean add(String s, int depth, Transaction t) throws AbortException {
+			System.out.println(s.charAt(depth));
 
 			// First case: we are at the end of the string and this is the correct node
 			if(depth >= s.length() || (s.charAt(depth) == character) && depth == s.length() - 1) {
@@ -130,17 +131,13 @@ public class Dictionary {
 	 * @param s The string that is being inserted in the set
 	 * @return true if s was not already inserted, false otherwise
 	 */
-	public boolean add(String s, Transaction t) {
+	public boolean add(String s, Transaction t) throws AbortException {
 		// System.out.println(s);
 		if (s != "") {
-			try {
-				Node node = start.read(t);
-				boolean result = node.add(s, 0, t);
-				start.write(t, node);
-				return result;
-			} catch (AbortException e) {
-				e.printStackTrace();
-			}
+			Node node = start.read(t);
+			boolean result = node.add(s, 0, t);
+			start.write(t, node);
+			return result;
 		}
 		boolean result = emptyAbsent;
 		emptyAbsent = false;
