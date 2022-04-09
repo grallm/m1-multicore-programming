@@ -39,6 +39,6 @@ public class Main
          }
 
         System.out.println("Result :");
-        System.out.println(dic.getWords());
+        System.out.println(dic);
     }
 }

@@ -89,7 +89,28 @@ public class Dictionary {
 
 			return next.read(t).add(s, depth, t);
 		}
-	
+
+		public String prettyPrint(String prefix, Transaction t) throws AbortException {
+			String futurePrefix = String.format("%s\t", prefix);
+			return String.format("%schar : %s%n%sabsent : %s%n%ssuffix : %s%n%snext : %s",
+					prefix, character, prefix, absent, prefix,
+					suffix.read(t) != null ? String.format("%n%s",
+							suffix.read(t).prettyPrint(futurePrefix, t)) : "null",
+					prefix,
+					next.read(t) != null ? String.format("%n%s",
+							next.read(t).prettyPrint(futurePrefix, t)) : "null");
+		}
+
+		@Override
+		public String toString() {
+			Transaction t = new TransactionTL2<>();
+			try {
+				return prettyPrint("", t);
+			} catch (AbortException e) {
+				e.printStackTrace();
+			}
+			return "";
+		}
 	}
 
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
@@ -105,7 +126,7 @@ public class Dictionary {
 	 * @return true if s was not already inserted, false otherwise
 	 */
 	public boolean add(String s, Transaction t) {
-		System.out.println(s);
+		// System.out.println(s);
 		if (s != "") {
 			try {
 				Node node = start.read(t);
@@ -165,5 +186,15 @@ public class Dictionary {
 		}
 
 		return words;
+	}
+
+	@Override
+	public String toString() {
+		try {
+			return this.start.read(new TransactionTL2<>()).toString();
+		} catch (AbortException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 }
