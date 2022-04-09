@@ -15,7 +15,7 @@ public class Main
     public static void main(String[] args)
     {
         // threadPool = Executors.newFixedThreadPool(10);
-        String[] dicWords = {"chameau", "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"};
+        String[] dicWords = {"chameau"/*, "chameaux", "chamelle", "chamelles", "chamelon", "chamelons", "chat", "chaton", "chatons", "chats", "chatte", "chattes"*/};
         Dictionary dic = new Dictionary();
 
          for (String str : dicWords)
@@ -32,9 +32,10 @@ public class Main
                      }
                      catch (AbortException e)
                      {
-                         e.printStackTrace();
+                         // e.printStackTrace();
                      }
                  }
+                System.out.println("Committed");
              // });
          }
 

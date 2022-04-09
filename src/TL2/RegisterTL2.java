@@ -11,8 +11,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
 {
     private final AtomicReference<T> value;
     private Date date;
-    private final Lock lock;
-    private boolean isLocked;
+    private final ReentrantLock lock;
 
     /**
      * Constructor
@@ -27,14 +26,12 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
 
     public void lock() {
         lock.lock();
-        isLocked = true;
     }
     public void unlock() {
         lock.unlock();
-        isLocked = false;
     }
     public boolean isLocked() {
-        return isLocked;
+        return lock.isLocked();
     }
 
     public Date getDate()
@@ -58,7 +55,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
     }
 
     public T read(Transaction t) throws AbortException {
-        return this.read((TransactionTL2) t);
+        return this.read((TransactionTL2<?>) t);
     }
     public T read(ITransactionTL2 t) throws AbortException
     {

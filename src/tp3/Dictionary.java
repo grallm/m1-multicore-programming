@@ -104,18 +104,17 @@ public class Dictionary {
 		@Override
 		public String toString() {
 			Transaction t = new TransactionTL2<>();
-			try {
-				String result = null;
-				while (!t.isCommited()) {
+			String result = null;
+			while (!t.isCommited()) {
+				try {
 					t.begin();
 					result =  prettyPrint("", t);
 					t.try_to_commit();
+				} catch (AbortException e) {
+					e.printStackTrace();
 				}
-				return result;
-			} catch (AbortException e) {
-				e.printStackTrace();
 			}
-			return "";
+			return result;
 		}
 	}
 
@@ -197,17 +196,16 @@ public class Dictionary {
 	@Override
 	public String toString() {
 		Transaction t = new TransactionTL2<>();
-		try {
-			String result = null;
-			while (!t.isCommited()) {
+		String result = null;
+		while (!t.isCommited()) {
+			try {
 				t.begin();
 				result =  this.start.read(t).toString();
 				t.try_to_commit();
+			} catch (AbortException e) {
+				e.printStackTrace();
 			}
-			return result;
-		} catch (AbortException e) {
-			e.printStackTrace();
 		}
-		return "";
+		return result;
 	}
 }

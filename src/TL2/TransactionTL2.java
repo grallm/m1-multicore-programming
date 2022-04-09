@@ -95,7 +95,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
         commitDate = new Date();
 
         // Update value and date of Write registers
-        for (IRegisterTL2 register : lws)
+        for (IRegisterTL2<T> register : lws)
         {
             register.setValue(lc.get(register).getValue());
             register.setDate(commitDate);
