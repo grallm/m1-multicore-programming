@@ -110,7 +110,7 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
             register.setDate(commitDate);
         }
 
-        // TODO: clear lc here ? needed ?
+        // clear lc here ? needed ?
 
         releaseLocks();
 

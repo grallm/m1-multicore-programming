@@ -55,7 +55,7 @@ public class WebGrep {
 
 	public WebGrep (String word, String address, ThreadPool threadPool) {
 		// Initialize the program using the options given in argument
-		Tools.initialize(String.format("-celt --threads=1000 %s %s", word, address));
+		Tools.initialize(String.format("-celt --threads=25 %s %s", word, address));
 
 		System.out.println("Started with " + Tools.numberThreads() + " threads\n");
 

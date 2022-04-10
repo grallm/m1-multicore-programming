@@ -10,8 +10,6 @@ import java.util.concurrent.ExecutorService;
 
 public class Main
 {
-    private static volatile ExecutorService threadPool;
-
     public static void main(String[] args) throws AbortException
     {
         final ClockManager clock = new ClockManager();

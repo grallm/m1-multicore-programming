@@ -96,8 +96,7 @@ public class RegisterTL2<T> implements IRegisterTL2<T>
         }
 
         IRegisterTL2<T> local = t.getCopy(this);
-        // TODO: use proper compareTo
-        if(local.getDate() == getDate() && local.getValue() == getValue()) // The local copy is the same as the current value
+        if(local.getDate() == getDate() && local.getValue() == getValue()) // The local copy is the same as the current value check just to be sure
         {
             t.putCopy(this, new RegisterTL2<>(v, getDate()));
         }
