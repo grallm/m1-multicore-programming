@@ -96,17 +96,6 @@ public class Dictionary {
 			return next.read(t).add(s, depth, t);
 		}
 
-/*		public String prettyPrint(String prefix, Transaction<Node> t) throws AbortException {
-			String futurePrefix = String.format("%s\t", prefix);
-			return String.format("%schar : %s%n%sabsent : %s%n%ssuffix : %s%n%snext : %s",
-					prefix, character, prefix, absent, prefix,
-					suffix.read(t) != null ? String.format("%n%s",
-							suffix.read(t).prettyPrint(futurePrefix, t)) : "null",
-					prefix,
-					next.read(t) != null ? String.format("%n%s",
-							next.read(t).prettyPrint(futurePrefix, t)) : "null");
-		}*/
-
 		public void printNode(String s, Transaction<Node> t) throws AbortException {
 			if (!this.absent.get()) {
 				System.out.println(s + this.character + "|");
@@ -122,22 +111,6 @@ public class Dictionary {
 
 		}
 
-/*
-		@Override
-		public String toString() {
-			Transaction t = new TransactionTL2<>();
-			String result = null;
-			while (!t.isCommited()) {
-				try {
-					t.begin();
-					result =  prettyPrint("", t);
-					t.try_to_commit();
-				} catch (AbortException e) {
-					e.printStackTrace();
-				}
-			}
-			return result;
-		}*/
 	}
 
 	// We start with a first node, to simplify the algorithm, that encodes the smallest non-empty string "\0".
@@ -188,54 +161,4 @@ public class Dictionary {
 			}
 		}
 	}
-
-	/**
-	 * Get all words contained in the Dictionary
-	 * @return All words
-	 */
-/*	public List<String> getWords() {
-		Transaction t = new TransactionTL2<Node>();
-		while (!t.isCommited()) {
-
-
-			try {
-				t.begin();
-				List<String> result =  getAllNodeWords(start, t);
-				t.try_to_commit();
-				System.out.println("get words return : " + result);
-				return result;
-			} catch (AbortException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-	private List<String> getAllNodeWords(Register<Node> node, Transaction t) throws AbortException {
-		List<String> words = new ArrayList<>();
-		words.add("");
-		System.out.println("call get all node words");
-
-		// Get full word
-		while (node != null) {
-			// System.out.println(words.get(0));
-			// System.out.println(node.read(t).character);
-			words.set(0, words.get(0) + node.read(t).suffix);
-
-			if (!node.read(t).absent && node.read(t).suffix != null) {
-				words.add(words.get(0));
-			}
-
-			// Add all nexts
-			Register<Node> next = node.read(t).next;
-			while (next != null) {
-				words.addAll(getAllNodeWords(next, t));
-				next = node.read(t).next;
-			}
-
-			node = node.read(t).suffix;
-		}
-
-		System.out.println("get all node words return : " + words);
-		return words;
-	}*/
 }

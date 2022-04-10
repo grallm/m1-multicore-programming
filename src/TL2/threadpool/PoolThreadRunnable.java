@@ -1,19 +1,15 @@
 package TL2.threadpool;
 
-import TL2.AbortException;
-import TL2.interfaces.Transaction;
-import tp3.Dictionary;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.FutureTask;
 
-public class PoolThreadRunnable implements Runnable
+public class PoolThreadRunnable<T> implements Runnable
 {
     private Thread thread = null;
-    private final BlockingQueue<FutureTask<Dictionary>> queue;
+    private final BlockingQueue<FutureTask<T>> queue;
     private boolean isStopped = false;
 
-    public PoolThreadRunnable(BlockingQueue<FutureTask<Dictionary>> _queue)
+    public PoolThreadRunnable(BlockingQueue<FutureTask<T>> _queue)
     {
         queue = _queue;
     }

@@ -93,8 +93,6 @@ public class TransactionTL2<T> implements ITransactionTL2<T>
         // Check lock date compatibility
         for (IRegisterTL2<T> register : lrs)
         {
-            // System.out.println("Register date: " + register.getDate());
-            // System.out.println("Transaction date: " + birthDate);
             if (register.getDate() > birthDate)
             {
                 // Release all locks and abort

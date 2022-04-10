@@ -1,17 +1,13 @@
 package TL2.threadpool;
 
 
-import TL2.AbortException;
-import TL2.interfaces.Transaction;
-import tp3.Dictionary;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ThreadPool
+public class ThreadPool<T>
 {
-    private BlockingQueue<FutureTask<Dictionary>> queue;
+    private BlockingQueue<FutureTask<T>> queue;
     private List<PoolThreadRunnable> runnables = new ArrayList<>();
     private boolean isStopped = false;
 
@@ -32,9 +28,9 @@ public class ThreadPool
         }
     }
 
-    public synchronized FutureTask<Dictionary> execute(Task t) throws IllegalStateException
+    public synchronized FutureTask<T> execute(Task<T> t) throws IllegalStateException
     {
-        FutureTask<Dictionary> futureTask = new FutureTask<>(t);
+        FutureTask<T> futureTask = new FutureTask<>(t);
         queue.offer(futureTask);
         if (this.isStopped) throw
                 new IllegalStateException("ThreadPool is stopped");

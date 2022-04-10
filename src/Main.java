@@ -1,13 +1,11 @@
 import TL2.AbortException;
-import TL2.TransactionTL2;
-import TL2.interfaces.Transaction;
+import TL2.threadpool.DictionaryTask;
 import TL2.threadpool.Task;
 import TL2.threadpool.ThreadPool;
 import TL2.utils.ClockManager;
 import tp3.Dictionary;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Main
 {
@@ -22,8 +20,7 @@ public class Main
 
          for (String str : dicWords)
          {
-             //dic.add(str);
-             threadPool.execute(new Task(str, dic));
+             threadPool.execute(new DictionaryTask(str, dic));
          }
 
         System.out.println("Result :");
