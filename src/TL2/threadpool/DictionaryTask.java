@@ -7,7 +7,7 @@ import tp3.Dictionary;
 
 import java.util.concurrent.Callable;
 
-public class DictionaryTask implements Task<Dictionary>
+public class DictionaryTask implements Task<String>
 {
     String string;
     Dictionary dictionary;
@@ -22,9 +22,9 @@ public class DictionaryTask implements Task<Dictionary>
      * Computes a result, or throws an exception if unable to do so.
      */
     @Override
-    public Dictionary call() throws AbortException
+    public String call() throws AbortException
     {
         dictionary.add(string);
-        return dictionary;
+        return string;
     }
 }

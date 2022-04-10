@@ -1,26 +1,28 @@
 package tp3;
 
+import TL2.threadpool.ThreadPool;
+
 import java.io.IOException;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class WebGrep {
-	private volatile static ExecutorService threadPool;
+	private volatile ThreadPool threadPool;
 
-	private final static Lock lock = new ReentrantLock();
+	private final Lock lock = new ReentrantLock();
 
-	private final static BlockingQueue<ParsedPage> prints = new LinkedBlockingQueue<>();
+	private final BlockingQueue<ParsedPage> prints = new LinkedBlockingQueue<>();
 
 	/**
 	 * Explored pages
 	 */
-	private final static ConcurrentSkipListSet<String> explored = new ConcurrentSkipListSet<String>();
+	private final ConcurrentSkipListSet<String> explored = new ConcurrentSkipListSet<String>();
 
 	/*
 	 *  Explore a page
 	 */
-	private static void explore(String address) {
+	private String explore(String address) {
 		try {
 			/*
 			 *  Check that the page was not already explored and adds it
@@ -42,22 +44,22 @@ public class WebGrep {
 
 					// Recursively explore other pages
 					for(String href : page.hrefs())
-						threadPool.submit(() -> explore(href));
+						threadPool.execute(() -> explore(href));
 				}
 			}
 		} catch (IOException e) {/*We could retry later...*/}
+		return address;
 	}
 
 
-	public static void main(String[] args) throws InterruptedException, IOException {
+	public WebGrep (String word, String address, ThreadPool threadPool) {
 		// Initialize the program using the options given in argument
-		if(args.length == 0) Tools.initialize("-celt --threads=1000 Nantes https://fr.wikipedia.org/wiki/Nantes");
-		else Tools.initialize(args);
+		Tools.initialize(String.format("-celt --threads=1000 %s %s", word, address));
 
 		System.out.println("Started with " + Tools.numberThreads() + " threads\n");
 
 		// Create the Thread Pool
-		threadPool = Executors.newFixedThreadPool(Tools.numberThreads());
+		this.threadPool = threadPool;
 
 		// Printing thread
 		new Thread(() -> {
@@ -72,7 +74,7 @@ public class WebGrep {
 		});
 
 		// Get the starting URL given in argument
-		for(String address : Tools.startingURL())
-			threadPool.submit(() -> explore(address));
+		for(String startAddress : Tools.startingURL())
+			threadPool.execute(() -> explore(startAddress));
 	}
 }

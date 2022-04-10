@@ -28,13 +28,12 @@ public class ThreadPool<T>
         }
     }
 
-    public synchronized FutureTask<T> execute(Task<T> t) throws IllegalStateException
+    public synchronized void execute(Task<T> t) throws IllegalStateException
     {
         FutureTask<T> futureTask = new FutureTask<>(t);
         queue.offer(futureTask);
         if (this.isStopped) throw
                 new IllegalStateException("ThreadPool is stopped");
-        return futureTask;
     }
 
     public synchronized void stop()
