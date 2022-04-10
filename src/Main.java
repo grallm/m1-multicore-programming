@@ -16,7 +16,7 @@ public class Main
     {
         final ClockManager clock = new ClockManager();
         Dictionary dic = new Dictionary();
-        ThreadPool threadPool = new ThreadPool(10);
+        ThreadPool<?> threadPool = new ThreadPool<>(10);
 
         new WebGrep("Nantes", "https://fr.wikipedia.org/wiki/Nantes", threadPool);
 

@@ -1,14 +1,13 @@
 package TL2.threadpool;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 public class ThreadPool<T>
 {
-    private BlockingQueue<FutureTask<T>> queue;
-    private List<PoolThreadRunnable> runnables = new ArrayList<>();
+    private final BlockingQueue<FutureTask<T>> queue;
+    private final List<PoolThreadRunnable<T>> runnables = new ArrayList<>();
     private boolean isStopped = false;
 
     public ThreadPool(int noOfThreads)
@@ -17,12 +16,12 @@ public class ThreadPool<T>
 
         for (int i = 0; i < noOfThreads; i++)
         {
-            PoolThreadRunnable poolThreadRunnable = new PoolThreadRunnable(queue);
+            PoolThreadRunnable<T> poolThreadRunnable = new PoolThreadRunnable<>(queue);
 
             runnables.add(poolThreadRunnable);
         }
 
-        for (PoolThreadRunnable runnable : runnables)
+        for (PoolThreadRunnable<T> runnable : runnables)
         {
             new Thread(runnable).start();
         }
@@ -39,7 +38,7 @@ public class ThreadPool<T>
     public synchronized void stop()
     {
         this.isStopped = true;
-        for (PoolThreadRunnable runnable : runnables)
+        for (PoolThreadRunnable<T> runnable : runnables)
         {
             runnable.doStop();
         }
