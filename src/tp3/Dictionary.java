@@ -125,7 +125,7 @@ public class Dictionary {
 	 * @param s The string that is being inserted in the set
 	 * @return true if s was not already inserted, false otherwise
 	 */
-	public boolean add(String s) throws AbortException {
+	public boolean add(String s) {
 		boolean result = false;
 		if (s != "") {
 			TransactionTL2<Node> t = new TransactionTL2<>();

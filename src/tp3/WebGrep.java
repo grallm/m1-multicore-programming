@@ -17,7 +17,7 @@ public class WebGrep {
 	/**
 	 * Explored pages
 	 */
-	private final ConcurrentSkipListSet<String> explored = new ConcurrentSkipListSet<String>();
+	private final Dictionary dictionary = new Dictionary();
 
 	/*
 	 *  Explore a page
@@ -31,7 +31,8 @@ public class WebGrep {
 			 * 	Because if one searches, but another adds just after, may have 2 explores
 			 * 	exploring same page.
 			 */
-			if(explored.add(address)) {
+			if(dictionary.add(address)) {
+
 				// Parse the page to find matches and hypertext links
 				ParsedPage page = Tools.parsePage(address);
 				if(!page.matches().isEmpty()) {
